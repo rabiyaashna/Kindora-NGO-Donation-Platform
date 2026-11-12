@@ -1,0 +1,17 @@
+
+{
+  "name": "ngo-donation-volunteer-platform",
+  "version": "1.0.0",
+  "description": "NGO Donation and Volunteer Platform - Zelvora Week 3",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

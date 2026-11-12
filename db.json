@@ -1,0 +1,33 @@
+{
+  "campaigns": [
+    {
+      "id": 1,
+      "title": "Feed a Hungry Child",
+      "category": "CHILD WELFARE",
+      "description": "Help provide nutritious meals to children in need.",
+      "image": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900",
+      "goal": 50000,
+      "raised": 32500
+    },
+    {
+      "id": 2,
+      "title": "Education for Everyone",
+      "category": "EDUCATION",
+      "description": "Give underprivileged children access to education.",
+      "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900",
+      "goal": 75000,
+      "raised": 48000
+    },
+    {
+      "id": 3,
+      "title": "Clean Water Initiative",
+      "category": "ENVIRONMENT",
+      "description": "Help communities access clean drinking water.",
+      "image": "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=900",
+      "goal": 60000,
+      "raised": 21000
+    }
+  ],
+  "donations": [],
+  "volunteers": []
+}

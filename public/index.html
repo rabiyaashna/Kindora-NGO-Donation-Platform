@@ -1,0 +1,431 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kindora | NGO Donation Platform</title>
+
+    <meta name="description" content="Support meaningful causes, donate to campaigns and become a volunteer.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <a href="#" class="logo">kindora<span>.</span></a>
+
+    <nav id="navigation">
+        <a href="#home">Home</a>
+        <a href="#campaigns">Campaigns</a>
+        <a href="#about">About Us</a>
+        <a href="#volunteer">Volunteer</a>
+    </nav>
+
+    <a href="#campaigns" class="nav-btn">Donate Now ↗</a>
+
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+</header>
+
+<main>
+
+<!-- HERO SECTION -->
+
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <span class="eyebrow">♥ TOGETHER WE CAN CHANGE LIVES</span>
+
+        <h1>
+            Small acts.<br>
+            <span>Big impact.</span>
+        </h1>
+
+        <p>
+            Every contribution creates a ripple of hope.
+            Join us in building a kinder, healthier and more equal world.
+        </p>
+
+        <div class="hero-actions">
+
+            <a href="#campaigns" class="primary-btn">
+                Explore Campaigns ↗
+            </a>
+
+            <a href="#about" class="text-btn">
+                Discover our mission →
+            </a>
+
+        </div>
+
+        <div class="hero-trust">
+
+            <div class="avatar-stack">
+                <span>👩</span>
+                <span>👨</span>
+                <span>👩</span>
+                <span>👨</span>
+            </div>
+
+            <p>
+                <strong>Making a difference</strong><br>
+                One good deed at a time.
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="hero-image">
+
+        <img
+            src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1200"
+            alt="Children receiving community support"
+        >
+
+        <div class="floating-card">
+
+            <span class="floating-icon">♥</span>
+
+            <div>
+                <strong>Every rupee matters</strong>
+                <small>Your kindness changes lives.</small>
+            </div>
+
+        </div>
+
+        <div class="image-label">
+            A LITTLE KINDNESS GOES A LONG WAY.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- STATISTICS -->
+
+<section class="stats-section" id="about">
+
+    <div class="stat-item">
+        <h2 id="totalRaised">₹0</h2>
+        <p>Total funds raised</p>
+    </div>
+
+    <div class="stat-item">
+        <h2 id="totalCampaigns">0</h2>
+        <p>Active campaigns</p>
+    </div>
+
+    <div class="stat-item">
+        <h2 id="totalDonations">0</h2>
+        <p>Donations received</p>
+    </div>
+
+    <div class="stat-item">
+        <h2 id="totalVolunteers">0</h2>
+        <p>Volunteers joined</p>
+    </div>
+
+</section>
+
+
+<!-- CAMPAIGNS -->
+
+<section class="campaign-section" id="campaigns">
+
+    <div class="section-heading">
+
+        <div>
+
+            <span class="eyebrow">OUR CAUSES</span>
+
+            <h2>
+                Be the reason <span>someone smiles.</span>
+            </h2>
+
+            <p>
+                Choose a cause that speaks to your heart
+                and help us create real change.
+            </p>
+
+        </div>
+
+        <a href="#campaigns" class="outline-btn">
+            View all causes →
+        </a>
+
+    </div>
+
+    <div class="campaign-grid" id="campaignGrid">
+        <p>Loading campaigns...</p>
+    </div>
+
+</section>
+
+
+<!-- IMPACT BANNER -->
+
+<section class="impact-banner">
+
+    <div>
+
+        <span class="eyebrow">YOUR KINDNESS MATTERS</span>
+
+        <h2>
+            Change doesn't happen by chance.<br>
+            <span>It happens because of people like you.</span>
+        </h2>
+
+        <p>
+            Whether you donate your time or money,
+            you can make a lasting difference.
+        </p>
+
+        <a href="#volunteer" class="light-btn">
+            Become a Volunteer ↗
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- VOLUNTEER SECTION -->
+
+<section class="volunteer-section" id="volunteer">
+
+    <div class="volunteer-info">
+
+        <span class="eyebrow">BE PART OF SOMETHING GOOD</span>
+
+        <h2>
+            Give your time.<br>
+            <span>Give someone hope.</span>
+        </h2>
+
+        <p>
+            Join our volunteer community and become part
+            of meaningful change. Your skills, energy and
+            compassion matter.
+        </p>
+
+        <div class="benefit">
+            <span>✓</span>
+            Make a real difference in communities
+        </div>
+
+        <div class="benefit">
+            <span>✓</span>
+            Meet people who share your values
+        </div>
+
+        <div class="benefit">
+            <span>✓</span>
+            Build skills through meaningful work
+        </div>
+
+    </div>
+
+
+    <form class="volunteer-form" id="volunteerForm">
+
+        <h3>Join our volunteer family</h3>
+
+        <p>Fill in your details to get started.</p>
+
+        <label for="volName">Full Name</label>
+        <input
+            id="volName"
+            type="text"
+            placeholder="Enter your name"
+            required
+        >
+
+        <label for="volEmail">Email Address</label>
+        <input
+            id="volEmail"
+            type="email"
+            placeholder="Enter your email"
+            required
+        >
+
+        <label for="volPhone">Phone Number</label>
+        <input
+            id="volPhone"
+            type="tel"
+            placeholder="Enter your phone number"
+            required
+        >
+
+        <label for="volInterest">Area of Interest</label>
+
+        <select id="volInterest" required>
+
+            <option value="">Select an area</option>
+            <option>Education</option>
+            <option>Child Welfare</option>
+            <option>Environment</option>
+            <option>Healthcare</option>
+            <option>Community Support</option>
+
+        </select>
+
+        <button type="submit" class="primary-btn full-btn">
+            Register as Volunteer ↗
+        </button>
+
+        <p id="volunteerMessage" class="form-message"></p>
+
+    </form>
+
+</section>
+
+
+<!-- NEWSLETTER / FINAL CTA -->
+
+<section class="newsletter">
+
+    <span class="eyebrow">STAY CONNECTED</span>
+
+    <h2>
+        Good things start with <span>good people.</span>
+    </h2>
+
+    <p>
+        Thank you for being part of a world where kindness comes first.
+    </p>
+
+    <a href="#campaigns" class="primary-btn">
+        Make a Donation ♥
+    </a>
+
+</section>
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <a href="#" class="logo">kindora<span>.</span></a>
+
+    <p>Building hope. Creating impact. Changing lives.</p>
+
+    <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#campaigns">Campaigns</a>
+        <a href="#volunteer">Volunteer</a>
+    </div>
+
+    <small>© 2026 Kindora. Made with ♥ for humanity.</small>
+
+</footer>
+
+
+<!-- DONATION MODAL -->
+
+<div class="modal" id="donationModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <div class="modal-content">
+
+        <button class="close-modal" id="closeModal" aria-label="Close">
+            &times;
+        </button>
+
+        <span class="eyebrow">MAKE A DIFFERENCE</span>
+
+        <h2 id="modalTitle">Support this cause</h2>
+
+        <p id="modalCampaignName"></p>
+
+        <form id="donationForm">
+
+            <label>Choose donation amount</label>
+
+            <div class="amount-options">
+
+                <button type="button" class="amount-btn active" data-amount="100">
+                    ₹100
+                </button>
+
+                <button type="button" class="amount-btn" data-amount="500">
+                    ₹500
+                </button>
+
+                <button type="button" class="amount-btn" data-amount="1000">
+                    ₹1,000
+                </button>
+
+                <button type="button" class="amount-btn" data-amount="2000">
+                    ₹2,000
+                </button>
+
+            </div>
+
+            <label for="customAmount">
+                Or enter custom amount (₹)
+            </label>
+
+            <input
+                id="customAmount"
+                type="number"
+                min="1"
+                placeholder="Enter amount"
+            >
+
+            <label for="donorName">Your Name</label>
+
+            <input
+                id="donorName"
+                type="text"
+                placeholder="Enter your name"
+                required
+            >
+
+            <label for="donorEmail">Email Address</label>
+
+            <input
+                id="donorEmail"
+                type="email"
+                placeholder="Enter your email"
+                required
+            >
+
+            <button type="submit" class="primary-btn full-btn">
+                Confirm Donation ♥
+            </button>
+
+        </form>
+
+        <p class="demo-note">
+            Demo platform: this records a donation pledge,
+            not a real payment.
+        </p>
+
+        <p id="donationMessage" class="form-message"></p>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
