@@ -1,443 +1,353 @@
 
+// ============================================
+// KINDORA - MAIN JAVASCRIPT
+// MongoDB + Express API integration
+// ============================================
+
 const API = "/api";
 
 let campaigns = [];
-let selectedCampaign = null;
 let selectedAmount = 100;
+let toastTimer;
 
-const campaignGrid = document.getElementById("campaignGrid");
-const donationModal = document.getElementById("donationModal");
-const donationForm = document.getElementById("donationForm");
-const customAmount = document.getElementById("customAmount");
-const toast = document.getElementById("toast");
+// DOM HELPERS
 
-function formatCurrency(amount) {
-    return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 0
-    }).format(amount);
-}
+const get = (id) => document.getElementById(id);
 
 function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add("show");
+  const toast = get("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
 
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 3000);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+async function apiRequest(endpoint, options = {}) {
+  const response = await fetch(`${API}${endpoint}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Something went wrong.");
+  }
+
+  return data;
 }
 
 // LOAD CAMPAIGNS
+
 async function loadCampaigns() {
-    try {
-        const response = await fetch(`${API}/campaigns`);
+  const grid = get("campaignGrid");
 
-        if (!response.ok) {
-            throw new Error("Unable to load campaigns");
-        }
+  try {
+    campaigns = await apiRequest("/campaigns");
 
-        campaigns = await response.json();
-        renderCampaigns();
-
-    } catch (error) {
-        campaignGrid.textContent =
-            "Unable to load campaigns. Please try again.";
-
-        console.error(error);
+    if (!Array.isArray(campaigns)) {
+      throw new Error("Invalid campaign data received.");
     }
+
+    renderCampaigns();
+  } catch (error) {
+    console.error("Campaign loading error:", error);
+    grid.innerHTML = `
+      <p class="error-message">
+        Unable to load campaigns. Please check your connection and try again.
+      </p>
+    `;
+  }
 }
 
 // DISPLAY CAMPAIGNS
+
 function renderCampaigns() {
-    campaignGrid.innerHTML = "";
+  const grid = get("campaignGrid");
 
-    campaigns.forEach(campaign => {
+  if (campaigns.length === 0) {
+    grid.innerHTML = `<p class="loading">No campaigns available right now.</p>`;
+    return;
+  }
 
-        const percentage = Math.min(
-            100,
-            Math.round((campaign.raised / campaign.goal) * 100)
-        );
+  grid.innerHTML = campaigns.map(campaign => {
+    const goal = Number(campaign.goal) || 0;
+    const raised = Number(campaign.raised) || 0;
 
-        const card = document.createElement("article");
-        card.className = "campaign-card";
+    const percentage = goal > 0
+      ? Math.min((raised / goal) * 100, 100)
+      : 0;
 
-        const image = document.createElement("img");
-        image.src = campaign.image;
-        image.alt = campaign.title;
-        image.loading = "lazy";
+    const image = campaign.image ||
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900";
 
-        const body = document.createElement("div");
-        body.className = "campaign-body";
+    return `
+      <article class="campaign-card">
+        <div class="campaign-image">
+          <img
+            src="${escapeHTML(image)}"
+            alt="${escapeHTML(campaign.title)}"
+            loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900'"
+          >
+          <span class="campaign-category">
+            ${escapeHTML(campaign.category || "COMMUNITY")}
+          </span>
+        </div>
 
-        const category = document.createElement("span");
-        category.className = "category";
-        category.textContent = campaign.category;
+        <div class="campaign-info">
+          <h3>${escapeHTML(campaign.title)}</h3>
+          <p>${escapeHTML(campaign.description || "")}</p>
 
-        const title = document.createElement("h3");
-        title.textContent = campaign.title;
+          <div class="progress-track">
+            <div class="progress-fill" style="width:${percentage}%"></div>
+          </div>
 
-        const description = document.createElement("p");
-        description.textContent = campaign.description;
+          <div class="fund-details">
+            <span><strong>${formatMoney(raised)}</strong> raised</span>
+            <span>Goal ${formatMoney(goal)}</span>
+          </div>
 
-        const progressInfo = document.createElement("div");
-        progressInfo.className = "progress-info";
+          <div class="fund-details">
+            <span>${percentage.toFixed(0)}% funded</span>
+          </div>
 
-        const raised = document.createElement("span");
-        raised.textContent = formatCurrency(campaign.raised);
+          <button
+            class="btn btn-primary"
+            onclick="openDonationModal(${Number(campaign.id)})"
+          >
+            Support This Cause ↗
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
 
-        const percent = document.createElement("span");
-        percent.textContent = `${percentage}%`;
+// BASIC HTML ESCAPING
 
-        progressInfo.append(raised, percent);
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
 
-        const track = document.createElement("div");
-        track.className = "progress-track";
+// FORMAT MONEY
 
-        const fill = document.createElement("div");
-        fill.className = "progress-fill";
-        fill.style.width = `${percentage}%`;
-
-        track.appendChild(fill);
-
-        const bottom = document.createElement("div");
-        bottom.className = "campaign-bottom";
-
-        const goal = document.createElement("strong");
-        goal.textContent = `Goal: ${formatCurrency(campaign.goal)}`;
-
-        const donateButton = document.createElement("button");
-        donateButton.className = "donate-btn";
-        donateButton.textContent = "Donate ↗";
-
-        donateButton.addEventListener("click", () => {
-            openDonationModal(campaign.id);
-        });
-
-        bottom.append(goal, donateButton);
-
-        body.append(
-            category,
-            title,
-            description,
-            progressInfo,
-            track,
-            bottom
-        );
-
-        card.append(image, body);
-        campaignGrid.appendChild(card);
-    });
+function formatMoney(amount) {
+  return "₹" + Number(amount || 0).toLocaleString("en-IN");
 }
 
 // LOAD STATISTICS
+
 async function loadStats() {
-    try {
-        const response = await fetch(`${API}/stats`);
+  try {
+    const stats = await apiRequest("/stats");
 
-        if (!response.ok) {
-            throw new Error("Unable to load statistics");
-        }
-
-        const stats = await response.json();
-
-        document.getElementById("totalRaised").textContent =
-            formatCurrency(stats.totalRaised);
-
-        document.getElementById("totalCampaigns").textContent =
-            stats.campaigns;
-
-        document.getElementById("totalDonations").textContent =
-            stats.donations;
-
-        document.getElementById("totalVolunteers").textContent =
-            stats.volunteers;
-
-    } catch (error) {
-        console.error(error);
-    }
+    get("campaignCount").textContent = stats.campaignCount ?? 0;
+    get("donationCount").textContent = stats.donationCount ?? 0;
+    get("volunteerCount").textContent = stats.volunteerCount ?? 0;
+    get("totalRaised").textContent = formatMoney(stats.totalRaised ?? 0);
+  } catch (error) {
+    console.error("Statistics loading error:", error);
+  }
 }
 
-// OPEN DONATION MODAL
+// DONATION MODAL
+
 function openDonationModal(campaignId) {
+  const campaign = campaigns.find(
+    item => Number(item.id) === Number(campaignId)
+  );
 
-    selectedCampaign = campaigns.find(
-        campaign => campaign.id === campaignId
-    );
+  if (!campaign) {
+    showToast("Campaign not found.");
+    return;
+  }
 
-    if (!selectedCampaign) return;
+  get("donationCampaignId").value = campaign.id;
+  get("modalTitle").textContent = campaign.title;
+  get("modalDescription").textContent =
+    campaign.description || "Your contribution can make a difference.";
 
-    document.getElementById("modalCampaignName").textContent =
-        selectedCampaign.title;
+  get("donationForm").reset();
+  get("donationStatus").textContent = "";
+  get("donationStatus").className = "form-status";
+  get("customAmount").value = "";
 
-    selectedAmount = 100;
-    customAmount.value = "";
+  selectedAmount = 100;
+  updateAmountButtons();
 
-    document.querySelectorAll(".amount-btn").forEach(button => {
-        button.classList.toggle(
-            "active",
-            Number(button.dataset.amount) === selectedAmount
-        );
-    });
-
-    document.getElementById("donationMessage").textContent = "";
-
-    donationModal.classList.add("active");
-    document.body.style.overflow = "hidden";
+  get("donationModal").classList.add("open");
+  get("donationModal").setAttribute("aria-hidden", "false");
 }
 
-// CLOSE DONATION MODAL
 function closeDonationModal() {
-    donationModal.classList.remove("active");
-    document.body.style.overflow = "";
+  get("donationModal").classList.remove("open");
+  get("donationModal").setAttribute("aria-hidden", "true");
 }
 
-document.getElementById("closeModal").addEventListener(
-    "click",
-    closeDonationModal
-);
-
-donationModal.addEventListener("click", event => {
-    if (event.target === donationModal) {
-        closeDonationModal();
-    }
+get("modalClose").addEventListener("click", closeDonationModal);
+get("modalBackdrop").addEventListener("click", closeDonationModal);
+get("navDonate").addEventListener("click", () => {
+  if (campaigns.length > 0) {
+    openDonationModal(campaigns[0].id);
+  } else {
+    showToast("Please wait for campaigns to load.");
+  }
 });
 
-document.addEventListener("keydown", event => {
-    if (event.key === "Escape") {
-        closeDonationModal();
-    }
-});
+// DONATION AMOUNT BUTTONS
 
-// SELECT AMOUNT
 document.querySelectorAll(".amount-btn").forEach(button => {
-
-    button.addEventListener("click", () => {
-
-        selectedAmount = Number(button.dataset.amount);
-        customAmount.value = "";
-
-        document.querySelectorAll(".amount-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
-
-        button.classList.add("active");
-    });
-
+  button.addEventListener("click", () => {
+    selectedAmount = Number(button.dataset.amount);
+    get("customAmount").value = "";
+    updateAmountButtons();
+  });
 });
 
-// CUSTOM AMOUNT
-customAmount.addEventListener("input", () => {
-
-    if (customAmount.value !== "") {
-
-        selectedAmount = Number(customAmount.value);
-
-        document.querySelectorAll(".amount-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
-
-    }
-
-});
+function updateAmountButtons() {
+  document.querySelectorAll(".amount-btn").forEach(button => {
+    button.classList.toggle(
+      "active",
+      Number(button.dataset.amount) === selectedAmount
+    );
+  });
+}
 
 // SUBMIT DONATION
-donationForm.addEventListener("submit", async event => {
 
-    event.preventDefault();
+get("donationForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
-    const amount = Number(customAmount.value || selectedAmount);
+  const button = get("donationSubmit");
+  const status = get("donationStatus");
 
-    const donorName =
-        document.getElementById("donorName").value.trim();
+  const customAmount = get("customAmount").value.trim();
+  const amount = customAmount === ""
+    ? selectedAmount
+    : Number(customAmount);
 
-    const email =
-        document.getElementById("donorEmail").value.trim();
+  if (!Number.isFinite(amount) || amount <= 0) {
+    status.textContent = "Enter a valid donation amount.";
+    status.className = "form-status error";
+    return;
+  }
 
-    const message =
-        document.getElementById("donationMessage");
+  const payload = {
+    campaignId: Number(get("donationCampaignId").value),
+    donorName: get("donorName").value.trim(),
+    email: get("donorEmail").value.trim(),
+    amount
+  };
 
-    if (!Number.isFinite(amount) || amount <= 0) {
-        message.textContent = "Enter a valid donation amount.";
-        return;
-    }
+  button.disabled = true;
+  button.textContent = "Submitting...";
 
-    if (!donorName || !email) {
-        message.textContent = "Please complete all details.";
-        return;
-    }
+  try {
+    const result = await apiRequest("/donations", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
 
-    const submitButton = donationForm.querySelector(
-        'button[type="submit"]'
-    );
+    status.textContent = result.message || "Donation recorded successfully!";
+    status.className = "form-status success";
 
-    submitButton.disabled = true;
-    submitButton.textContent = "Processing...";
+    await Promise.all([loadCampaigns(), loadStats()]);
 
-    try {
+    showToast("Thank you for your kindness!");
 
-        const response = await fetch(`${API}/donations`, {
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                campaignId: selectedCampaign.id,
-                donorName,
-                email,
-                amount
-            })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.message || "Donation failed");
-        }
-
-        closeDonationModal();
-        donationForm.reset();
-
-        showToast(
-            `Thank you! Your ₹${amount} donation pledge was recorded.`
-        );
-
-        await Promise.all([
-            loadCampaigns(),
-            loadStats()
-        ]);
-
-    } catch (error) {
-
-        message.textContent = error.message;
-
-    } finally {
-
-        submitButton.disabled = false;
-        submitButton.textContent = "Confirm Donation ♥";
-
-    }
-
+    setTimeout(closeDonationModal, 1400);
+  } catch (error) {
+    status.textContent = error.message;
+    status.className = "form-status error";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Confirm Donation ↗";
+  }
 });
 
 // VOLUNTEER REGISTRATION
-const volunteerForm =
-    document.getElementById("volunteerForm");
 
-volunteerForm.addEventListener("submit", async event => {
+get("volunteerForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
-    event.preventDefault();
+  const button = get("volunteerSubmit");
+  const status = get("volunteerStatus");
 
-    const message =
-        document.getElementById("volunteerMessage");
+  const payload = {
+    name: get("volunteerName").value.trim(),
+    email: get("volunteerEmail").value.trim(),
+    phone: get("volunteerPhone").value.trim(),
+    interest: get("volunteerInterest").value,
+    message: get("volunteerMessage").value.trim()
+  };
 
-    const volunteer = {
+  button.disabled = true;
+  button.textContent = "Submitting...";
 
-        name: document.getElementById("volName").value.trim(),
+  try {
+    const result = await apiRequest("/volunteers", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
 
-        email: document.getElementById("volEmail").value.trim(),
+    status.textContent =
+      result.message || "Your registration was successful!";
 
-        phone: document.getElementById("volPhone").value.trim(),
+    status.className = "form-status success";
 
-        interest: document.getElementById("volInterest").value
+    get("volunteerForm").reset();
 
-    };
-
-    if (volunteer.phone.length < 10) {
-        message.textContent = "Please enter a valid phone number.";
-        return;
-    }
-
-    const submitButton = volunteerForm.querySelector(
-        'button[type="submit"]'
-    );
-
-    submitButton.disabled = true;
-    submitButton.textContent = "Registering...";
-
-    try {
-
-        const response = await fetch(`${API}/volunteers`, {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify(volunteer)
-
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.message || "Registration failed");
-        }
-
-        volunteerForm.reset();
-
-        message.textContent =
-            "Registration successful! Welcome aboard ♥";
-
-        showToast("Welcome to our volunteer community!");
-
-        await loadStats();
-
-    } catch (error) {
-
-        message.textContent = error.message;
-
-    } finally {
-
-        submitButton.disabled = false;
-
-        submitButton.textContent =
-            "Register as Volunteer ↗";
-
-    }
-
+    await loadStats();
+    showToast("Welcome to the Kindora community!");
+  } catch (error) {
+    status.textContent = error.message;
+    status.className = "form-status error";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Submit Registration ↗";
+  }
 });
 
 // MOBILE NAVIGATION
-const menuToggle =
-    document.getElementById("menuToggle");
 
-const nav =
-    document.querySelector(".navbar nav");
-
-menuToggle.addEventListener("click", () => {
-    nav.classList.toggle("open");
+get("menuToggle").addEventListener("click", () => {
+  get("navigation").classList.toggle("show");
 });
 
-nav.querySelectorAll("a").forEach(link => {
-
-    link.addEventListener("click", () => {
-        nav.classList.remove("open");
-    });
-
+document.querySelectorAll("#navigation a").forEach(link => {
+  link.addEventListener("click", () => {
+    get("navigation").classList.remove("show");
+  });
 });
 
-// INITIALIZE WEBSITE
-async function initializeApp() {
+// CLOSE MODAL WITH ESCAPE
 
-    await Promise.all([
-        loadCampaigns(),
-        loadStats()
-    ]);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeDonationModal();
+  }
+});
 
+// AUTO REFRESH CAMPAIGNS AND STATISTICS
+
+async function refreshData() {
+  await Promise.all([loadCampaigns(), loadStats()]);
 }
 
-// AUTOMATIC DATA REFRESH
-setInterval(async () => {
+// INITIALIZE
 
-    await Promise.all([
-        loadCampaigns(),
-        loadStats()
-    ]);
+document.addEventListener("DOMContentLoaded", refreshData);
 
-}, 5000);
-
-initializeApp();
+// Refresh data periodically for other visitors' donations.
+// Submission by this visitor updates immediately.
+setInterval(refreshData, 10000);
